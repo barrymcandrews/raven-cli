@@ -16,7 +16,7 @@ async function main(): Promise<number> {
     username: 'barrydalive',
     password: '***REMOVED***'
   });
-  const chatScreen = ChatScreen();
+  const chatScreen = await ChatScreen();
   chatScreen.render();
   chatScreen.emit('show');
   await once(chatScreen, 'close');
