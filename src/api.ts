@@ -32,5 +32,5 @@ export async function getRooms(): Promise<Room[]> {
 
 export async function getMessages(roomName: string, before = Date.now()): Promise<Message[]> {
   const encodedRoom = encodeURIComponent(roomName);
-  return (await api.get(`/rooms/${encodedRoom}/messages`)).data.items;
+  return (await api.get(`/rooms/${encodedRoom}/messages?limit=40`)).data.items;
 }
