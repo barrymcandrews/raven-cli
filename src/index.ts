@@ -17,7 +17,6 @@ async function main(): Promise<number> {
     },
   ]);
 
-  // Chat
   try {
     await logIn(answers);
   } catch (e) {
@@ -25,6 +24,10 @@ async function main(): Promise<number> {
     process.exit(1);
   }
 
+
+  // Chat
+
+  process.stdin.removeAllListeners('data'); // Prevent inquirer and blessed from fighting
   const chatScreen = await ChatScreen();
   chatScreen.render();
   chatScreen.emit('show');
