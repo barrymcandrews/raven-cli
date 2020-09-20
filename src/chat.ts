@@ -6,7 +6,7 @@ import {
   box as Box,
   textbox as TextBox,
 } from 'blessed';
-import {getMessages, getRooms, Message, Room} from './api';
+import {getMessages, getMessagesBetween, getRooms, Message, Room} from './api';
 import BoxElement = Widgets.BoxElement;
 import dateFormat from 'dateformat';
 import {getUser} from './auth';
@@ -241,6 +241,15 @@ export async function ChatScreen(): Promise<Widgets.Screen> {
     }
     ws.send(JSON.stringify(msg));
     messageBox.clearValue();
+    messageBox.focus();
+    screen.render();
+  }
+
+  async function getMissedMessages() {
+    let missed = await getMessagesBetween(rooms[currentRoomIndex].name, Date.now(), messages[0].timeSent);
+    messages.unshift(...missed);
+    await renderMessages();
+    messagesList.setScrollPerc(100);
     screen.render();
   }
 
@@ -257,10 +266,11 @@ export async function ChatScreen(): Promise<Widgets.Screen> {
           }
         });
         const sendHandler = () => sendMessage(ws);
-        ws.on('open', () => {
+        ws.on('open', async () => {
           statusText.setContent('[    Connected    ]');
           screen.render();
           messageBox.key('enter', sendHandler);
+          await getMissedMessages();
         });
         ws.on('close', () => messageBox.unkey('enter', sendHandler));
       }

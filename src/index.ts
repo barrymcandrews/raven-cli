@@ -26,7 +26,6 @@ async function main(): Promise<number> {
 
 
   // Chat
-
   process.stdin.removeAllListeners('data'); // Prevent inquirer and blessed from fighting
   const chatScreen = await ChatScreen();
   chatScreen.render();

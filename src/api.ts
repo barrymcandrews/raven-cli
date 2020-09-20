@@ -30,7 +30,12 @@ export async function getRooms(): Promise<Room[]> {
   return (await api.get('/rooms')).data;
 }
 
-export async function getMessages(roomName: string, before = Date.now()): Promise<Message[]> {
+export async function getMessages(roomName: string): Promise<Message[]> {
   const encodedRoom = encodeURIComponent(roomName);
   return (await api.get(`/rooms/${encodedRoom}/messages?limit=40`)).data.items;
+}
+
+export async function getMessagesBetween(roomName: string, before: number, after: number): Promise<Message[]> {
+  const encodedRoom = encodeURIComponent(roomName);
+  return (await api.get(`/rooms/${encodedRoom}/messages?before=${before}&after=${after}`)).data.items;
 }
