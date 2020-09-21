@@ -246,7 +246,7 @@ export async function ChatScreen(): Promise<Widgets.Screen> {
   }
 
   async function getMissedMessages() {
-    let missed = await getMessagesBetween(rooms[currentRoomIndex].name, Date.now(), messages[0].timeSent);
+    let missed = await getMessagesBetween(rooms[currentRoomIndex].name, Date.now(), messages[0].timeSent + 1);
     messages.unshift(...missed);
     await renderMessages();
     messagesList.setScrollPerc(100);
