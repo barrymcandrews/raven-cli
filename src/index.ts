@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import {once} from 'events';
 import {ChatScreen} from './chat';
 import {logIn} from './auth';

@@ -1,14 +1,19 @@
 {
-  "name": "raven-cli",
-  "version": "1.0.0",
-  "main": "index.js",
+  "name": "@bmcandrews/raven-cli",
+  "version": "0.1.0",
+  "main": "./build/index.js",
   "license": "MIT",
   "scripts": {
     "build": "tsc",
-    "start": "ts-node src/index.ts"
+    "start": "ts-node src/index.ts",
+    "local": "yarn global add $PWD && raven"
   },
   "bin": {
-    "raven": "build/index.js"
+    "raven": "./build/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/barrymcandrews/raven-cli.git"
   },
   "dependencies": {
     "@types/blessed": "^0.1.17",
@@ -17,7 +22,7 @@
     "@types/node": "^14.10.1",
     "@types/ws": "^7.2.6",
     "amazon-cognito-identity-js": "^4.4.0",
-    "axios": "^0.20.0",
+    "axios": "^0.19.0",
     "blessed": "^0.1.81",
     "blessed-contrib": "^4.8.20",
     "dateformat": "^3.0.3",
