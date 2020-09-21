@@ -39,7 +39,7 @@ export async function ChatScreen(): Promise<Widgets.Screen> {
     autoPadding: true,
     // fullUnicode: true,
   });
-
+  screen.title = 'Raven Messenger';
 
 
   // Sidebar
