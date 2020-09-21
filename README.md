@@ -19,7 +19,7 @@ The goal of the CLI is to provide programmatic access to Raven's messages and ro
  
 ## Getting Started
 Before using this project you'll need to create an account using the [React Frontend](https://github.com/barrymcandrews/raven-react). 
-
+<!--
 ### Installation
 
 Install the application by using the node package manager of your choice:
@@ -33,7 +33,7 @@ Once installed, start the TUI by running the `raven` command:
 ```
 $ raven
 ```
-
+-->
 ### Building from Source
 
 To set up the project, clone the repository and install the dependencies.
