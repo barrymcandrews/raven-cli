@@ -15,6 +15,7 @@
     "type": "git",
     "url": "https://github.com/barrymcandrews/raven-cli.git"
   },
+  "keywords": ["chat", "tui", "blessed", "websockets", "raven-messenger"],
   "dependencies": {
     "@types/blessed": "^0.1.17",
     "@types/dateformat": "^3.0.1",
