@@ -25,12 +25,21 @@ const aboutPage: Page = {
 };
 const pages = [aboutPage];
 
+type SidebarItem = Room | Page;
+
+function isRoom(item: SidebarItem): boolean {
+  return 'creator' in item;
+}
+
+function isPage(item: SidebarItem): boolean {
+  return 'body' in item;
+}
 
 export async function ChatScreen(): Promise<Widgets.Screen> {
 
-  let currentRoomIndex = 0;
+  let sidebarSelectionIndex = 0;
   let messages: Message[] = [];
-  let rooms: Array<Room | Page> = [...pages];
+  let sidebarItems: Array<Room | Page> = [...pages];
 
   const username = (await getUser()!).getUsername();
 
@@ -132,6 +141,7 @@ export async function ChatScreen(): Promise<Widgets.Screen> {
     tags: true,
     content: `{#00ffff-fg}[${username}]{/}`,
     width: username.length + 3,
+    hidden: true,
   })
 
   const messageBox = TextBox({
@@ -143,7 +153,8 @@ export async function ChatScreen(): Promise<Widgets.Screen> {
     mouse: true,
     inputOnFocus: true,
     keys: true,
-    bg: '#262626'
+    bg: '#262626',
+    hidden: true,
   });
 
 
@@ -162,18 +173,22 @@ export async function ChatScreen(): Promise<Widgets.Screen> {
   // Event Handlers
 
   async function itemSelected(item: BoxElement, number: number) {
-    let element = rooms[number];
-    currentRoomIndex = number;
+    let sidebarItem = sidebarItems[number];
+    sidebarSelectionIndex = number;
     messagesList.setContent("");
     messagesList.clearItems();
-    if ('body' in element) {
-      let page = element as Page;
+    if (isPage(sidebarItem)) {
+      let page = sidebarItem as Page;
+      usernameText.hide();
+      messageBox.hide();
       messagesList.setContent(page.body);
       close();
       statusText.setContent('[      READY      ]');
       screen.render();
     } else {
-      let room = element as Room;
+      usernameText.show();
+      messageBox.show();
+      let room = sidebarItem as Room;
       messageBox.focus();
       screen.render();
       await connectToRoom(room.name);
@@ -184,17 +199,17 @@ export async function ChatScreen(): Promise<Widgets.Screen> {
 
   async function renderRooms() {
     roomsList.clearItems();
-    rooms.forEach(room => roomsList.addItem(room.name));
+    sidebarItems.forEach(room => roomsList.addItem(room.name));
     screen.render();
   }
   screen.on('show', renderRooms);
 
   async function fetchRooms() {
     try {
-      rooms = [...pages, ...(await getRooms())];
+      sidebarItems = [...pages, ...(await getRooms())];
       await renderRooms();
     } catch (e) {
-      focusText.setContent('{red-fg}Unable to load rooms.{/red-fg}')
+      focusText.setContent('{red-fg}Unable to load sidebarItems.{/red-fg}')
       throw e;
     }
     screen.render();
@@ -236,7 +251,7 @@ export async function ChatScreen(): Promise<Widgets.Screen> {
       action: "message",
       message: messageBox.getValue(),
       sender: username,
-      roomName: rooms[currentRoomIndex].name,
+      roomName: sidebarItems[sidebarSelectionIndex].name,
       timeSent: Date.now(),
     }
     ws.send(JSON.stringify(msg));
@@ -246,7 +261,7 @@ export async function ChatScreen(): Promise<Widgets.Screen> {
   }
 
   async function getMissedMessages() {
-    let missed = await getMessagesBetween(rooms[currentRoomIndex].name, Date.now(), messages[0].timeSent + 1);
+    let missed = await getMessagesBetween(sidebarItems[sidebarSelectionIndex].name, Date.now(), messages[0].timeSent + 1);
     messages.unshift(...missed);
     await renderMessages();
     messagesList.setScrollPerc(100);
@@ -301,14 +316,17 @@ export async function ChatScreen(): Promise<Widgets.Screen> {
 
   screen.key(['r', 'escape'], () => roomsList.focus());
   screen.key('s', () => messagesList.focus());
-  screen.key('e', () => messageBox.focus());
+  screen.key('e', () => {
+    if (isRoom(sidebarItems[sidebarSelectionIndex]))
+    messageBox.focus()
+  });
 
   roomsList.on('focus', () => {
     focusText.setContent('{#3b3b3b-bg}--ROOMS--');
     screen.render();
   });
   messagesList.on('focus', () => {
-    focusText.setContent('{#008000-bg}--SCROLL--');
+    focusText.setContent('{#611C35-bg}--SCROLL--');
     screen.render();
   });
   messageBox.on('focus', () => {
