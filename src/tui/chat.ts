@@ -173,6 +173,7 @@ export async function ChatScreen(): Promise<Widgets.Screen> {
   // Event Handlers
 
   async function itemSelected(item: BoxElement, number: number) {
+    if (number === sidebarSelectionIndex) return;
     let sidebarItem = sidebarItems[number];
     sidebarSelectionIndex = number;
     messagesList.setContent("");
@@ -301,6 +302,7 @@ export async function ChatScreen(): Promise<Widgets.Screen> {
     screen.render();
   }
 
+  process.removeAllListeners('unhandledRejection');
   process.on('unhandledRejection', error => {
     screen.destroy();
     console.log(error);
