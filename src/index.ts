@@ -2,30 +2,17 @@
 
 import {once} from 'events';
 import {ChatScreen} from './chat';
-import {logIn} from './auth';
-import inquirer from 'inquirer';
+import {Auth} from './auth';
+import * as Api from './api'
+import yargs from 'yargs';
+import {ensureConfig} from './config';
 
-async function main(): Promise<number> {
+
+async function main(): Promise<void> {
+  await ensureConfig();
+
   // Log In
-  let answers = await inquirer.prompt([
-    {
-      name: 'username',
-      message: 'What is your username?',
-    },
-    {
-      name: 'password',
-      message: 'What is your password?',
-      type: 'password'
-    },
-  ]);
-
-  try {
-    await logIn(answers);
-  } catch (e) {
-    console.log('An error occurred: ' + e.message);
-    process.exit(1);
-  }
-
+  await Auth.authenticate();
 
   // Chat
   process.stdin.removeAllListeners('data'); // Prevent inquirer and blessed from fighting
@@ -34,8 +21,32 @@ async function main(): Promise<number> {
   chatScreen.emit('show');
   await once(chatScreen, 'close');
   chatScreen.destroy();
-
-  return 0;
 }
 
-main().then(process.exit);
+interface SendMessageArgs {
+  room: string,
+  message: string
+}
+
+process.on('unhandledRejection', error => {
+  console.log(error);
+  process.exit(-1);
+});
+
+yargs
+  .command('$0', 'default', main)
+  .command('chat', 'chat', main)
+  .command('auth', 'auth', async () => {
+    console.log(JSON.stringify(await Auth.authenticate()));
+  })
+  .command<SendMessageArgs>({
+    command: 'send-message',
+    describe: 'send message',
+    handler: async args => {
+      await Auth.authenticate();
+      await Api.sendMessage(args.room, args.message);
+    }
+  })
+  .argv
+
+
