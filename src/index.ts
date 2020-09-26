@@ -19,7 +19,13 @@ yargs
   .command('$0', 'default', startTui)
   .command('chat', 'chat', startTui)
   .command('auth', 'auth', async () => {
-    console.log(JSON.stringify(await Auth.authenticate()));
+    let session = await Auth.authenticate();
+    console.log(JSON.stringify({
+      accessToken: session.getAccessToken().getJwtToken(),
+      idToken: session.getIdToken().getJwtToken(),
+      refreshToken: session.getRefreshToken().getToken(),
+      username: session.getAccessToken().payload.username,
+    }));
   })
   .command<SendMessageArgs>({
     command: 'send-message',
