@@ -15,22 +15,32 @@
     "type": "git",
     "url": "https://github.com/barrymcandrews/raven-cli.git"
   },
-  "keywords": ["chat", "tui", "blessed", "websockets", "raven-messenger"],
+  "keywords": [
+    "chat",
+    "tui",
+    "blessed",
+    "websockets",
+    "raven-messenger"
+  ],
   "dependencies": {
     "@types/blessed": "^0.1.17",
     "@types/dateformat": "^3.0.1",
     "@types/inquirer": "^7.3.1",
+    "@types/js-yaml": "^3.12.5",
     "@types/node": "^14.10.1",
     "@types/ws": "^7.2.6",
+    "@types/yargs": "^15.0.7",
     "amazon-cognito-identity-js": "^4.4.0",
     "axios": "^0.19.0",
     "blessed": "^0.1.81",
     "blessed-contrib": "^4.8.20",
     "dateformat": "^3.0.3",
     "inquirer": "^7.3.3",
+    "js-yaml": "^3.14.0",
     "ts-node": "^9.0.0",
     "typescript": "^4.0.2",
-    "ws": "^7.3.1"
+    "ws": "^7.3.1",
+    "yargs": "^16.0.3"
   },
   "optionalDependencies": {
     "bufferutil": "^4.0.1",
