@@ -1,63 +1,123 @@
 import {
   CognitoUserPool,
   CognitoUser,
-  AuthenticationDetails, CognitoUserSession,
+  AuthenticationDetails, CognitoUserSession, CognitoRefreshToken,
 } from 'amazon-cognito-identity-js';
+import * as Config from './config';
+import inquirer from 'inquirer';
 
-
-let userPool = new CognitoUserPool({
-  UserPoolId : 'us-east-1_XRj8Hgtje',
-  ClientId : '1b70rbnqrr76bpqbo8jlgk95rj',
-});
-
-let cognitoUser: CognitoUser | undefined;
-let session: CognitoUserSession | undefined;
-
-export interface AuthDetails {
+export interface UserLogin {
   username: string,
   password: string,
 }
 
+export class Authenticator {
+  cognitoUser!: CognitoUser;
+  session!: CognitoUserSession;
 
-async function createSession(details: AuthDetails): Promise<CognitoUserSession> {
-  let authenticationDetails = new AuthenticationDetails({
-    Username: details.username,
-    Password: details.password,
-  });
 
-  cognitoUser = new CognitoUser({
-    Username: details.username,
-    Pool: userPool
-  });
+  async getSession(): Promise<CognitoUserSession> {
+    if (!this.session || !this.cognitoUser) throw Error("Not logged In.");
+    if (!this.session.isValid()) this.session = await this.refresh();
+    return this.session;
+  }
 
-  return new Promise<CognitoUserSession>((accept, reject) => {
-    cognitoUser!.authenticateUser(authenticationDetails, {
-      onSuccess: accept,
-      onFailure: reject,
+
+  getUser(): CognitoUser | undefined {
+    return this.cognitoUser;
+  }
+
+
+  async refresh(token?: string): Promise<CognitoUserSession> {
+    let refreshToken = (!token) ? this.session!.getRefreshToken() : new CognitoRefreshToken({RefreshToken: token});
+    this.session = await new Promise<CognitoUserSession>((accept, reject) => {
+      this.cognitoUser!.refreshSession(refreshToken, (err, result) => {
+        if (err) reject(err);
+        else accept(result);
+      });
     });
-  });
-}
+    await this.updateConfig();
+    return this.session;
+  }
 
-async function refresh(): Promise<CognitoUserSession> {
-  return await new Promise<CognitoUserSession>((accept, reject) => {
-    cognitoUser!.refreshSession(session!.getRefreshToken(), (err, result) => {
-      if (err) reject(err);
-      else accept(result);
+
+  async authenticate(): Promise<CognitoUserSession> {
+    if (this.session) {
+      try {
+        this.session = await this.refresh();
+        return this.session;
+      } catch (e) {
+        console.log("Login object not found.")
+      }
+    }
+
+    const config = await Config.getConfig();
+    if ('refreshToken' in config && 'username' in config) {
+      try {
+      this.cognitoUser = new CognitoUser({
+        Username: config.username!,
+        Pool: new CognitoUserPool({
+          UserPoolId: config.userPoolId,
+          ClientId: config.clientId,
+        })
+      });
+      return await this.refresh(config.refreshToken);
+      } catch (e) {
+        console.log("Refresh Token not found.")
+      }
+    }
+
+    let answers = await inquirer.prompt([
+      {
+        name: 'username',
+        message: 'What is your username?',
+      },
+      {
+        name: 'password',
+        message: 'What is your password?',
+        type: 'password'
+      },
+    ]);
+    return await this.createSession(answers);
+  }
+
+
+  private async updateConfig() {
+    await Config.setValues({
+      username: this.cognitoUser.getUsername(),
+      refreshToken: this.session.getRefreshToken().getToken(),
+      idToken: this.session.getIdToken().getJwtToken(),
+      accessToken: this.session.getAccessToken().getJwtToken()
     });
-  });
+  }
+
+
+  private async createSession(details: UserLogin): Promise<CognitoUserSession> {
+    const config = await Config.getConfig();
+
+    this.cognitoUser = new CognitoUser({
+      Username: details.username,
+      Pool: new CognitoUserPool({
+        UserPoolId: config.userPoolId,
+        ClientId: config.clientId,
+      })
+    });
+
+    let authenticationDetails = new AuthenticationDetails({
+      Username: details.username,
+      Password: details.password,
+    });
+
+    this.session = await new Promise<CognitoUserSession>((accept, reject) => {
+      this.cognitoUser!.authenticateUser(authenticationDetails, {
+        onSuccess: accept,
+        onFailure: reject,
+      });
+    });
+
+    await this.updateConfig();
+    return this.session;
+  }
 }
 
-export async function logIn(details: AuthDetails) {
-  session = await createSession(details);
-  return session;
-}
-
-export async function getSession(): Promise<CognitoUserSession> {
-  if (!session || !cognitoUser) throw Error("Not logged In.");
-  if (!session.isValid()) session = await refresh();
-  return session;
-}
-
-export function getUser(): CognitoUser | undefined {
-  return cognitoUser;
-}
+export const Auth = new Authenticator();
