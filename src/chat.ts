@@ -1,18 +1,19 @@
 import {
-  Widgets,
-  screen as Screen,
-  list as List,
-  text as Text,
   box as Box,
+  list as List,
+  screen as Screen,
+  text as Text,
   textbox as TextBox,
+  Widgets,
 } from 'blessed';
-import {getMessages, getMessagesBetween, getRooms, Message, Room} from './api';
-import BoxElement = Widgets.BoxElement;
+import {Message, Room} from './api';
+import * as Api from './api';
 import dateFormat from 'dateformat';
-import {getUser} from './auth';
+import {Auth} from './auth';
 import {close, connect} from './websocket';
 import WebSocket from 'ws';
 import {about} from './pages';
+import BoxElement = Widgets.BoxElement;
 
 interface Page {
   name: string
@@ -41,7 +42,7 @@ export async function ChatScreen(): Promise<Widgets.Screen> {
   let messages: Message[] = [];
   let sidebarItems: Array<Room | Page> = [...pages];
 
-  const username = (await getUser()!).getUsername();
+  const username = (await Auth.getUser()!).getUsername();
 
   const screen = Screen({
     smartCSR: true,
@@ -206,7 +207,7 @@ export async function ChatScreen(): Promise<Widgets.Screen> {
 
   async function fetchRooms() {
     try {
-      sidebarItems = [...pages, ...(await getRooms())];
+      sidebarItems = [...pages, ...(await Api.getRooms())];
       await renderRooms();
     } catch (e) {
       focusText.setContent('{red-fg}Unable to load sidebarItems.{/red-fg}')
@@ -261,7 +262,7 @@ export async function ChatScreen(): Promise<Widgets.Screen> {
   }
 
   async function getMissedMessages() {
-    let missed = await getMessagesBetween(sidebarItems[sidebarSelectionIndex].name, Date.now(), messages[0].timeSent + 1);
+    let missed = await Api.getMessagesBetween(sidebarItems[sidebarSelectionIndex].name, Date.now(), messages[0].timeSent + 1);
     messages.unshift(...missed);
     await renderMessages();
     messagesList.setScrollPerc(100);
@@ -291,7 +292,7 @@ export async function ChatScreen(): Promise<Widgets.Screen> {
       }
       setupWs();
 
-      messages = await getMessages(roomName);
+      messages = await Api.getMessages(roomName);
       await renderMessages();
       messagesList.setScrollPerc(100);
     } catch (e) {
