@@ -6,11 +6,10 @@ import {
   textbox as TextBox,
   Widgets,
 } from 'blessed';
-import {Message, Room} from './api';
-import * as Api from './api';
+import {Message, Room} from '../lib/api';
 import dateFormat from 'dateformat';
-import {Auth} from './auth';
-import {close, connect} from './websocket';
+import {Auth, Api} from '../lib';
+import {close, connect} from '../lib/websocket';
 import WebSocket from 'ws';
 import {about} from './pages';
 import BoxElement = Widgets.BoxElement;

@@ -1,15 +1,17 @@
 {
   "name": "@bmcandrews/raven-cli",
   "version": "0.1.2",
-  "main": "./build/index.js",
+  "main": "./build/lib/index.js",
   "license": "MIT",
   "scripts": {
     "build": "tsc",
     "start": "ts-node src/index.ts",
+    "start-tui": "ts-node src/tui/index.ts",
     "local": "yarn global add $PWD && raven"
   },
   "bin": {
-    "raven": "./build/index.js"
+    "raven": "./build/index.js",
+    "raven-tui": "./build/tui/index.js"
   },
   "repository": {
     "type": "git",

@@ -1,27 +1,9 @@
 #!/usr/bin/env node
 
-import {once} from 'events';
-import {ChatScreen} from './chat';
-import {Auth} from './auth';
-import * as Api from './api'
+import {Auth, Api} from './lib';
 import yargs from 'yargs';
-import {ensureConfig} from './config';
+import {startTui} from './tui';
 
-
-async function main(): Promise<void> {
-  await ensureConfig();
-
-  // Log In
-  await Auth.authenticate();
-
-  // Chat
-  process.stdin.removeAllListeners('data'); // Prevent inquirer and blessed from fighting
-  const chatScreen = await ChatScreen();
-  chatScreen.render();
-  chatScreen.emit('show');
-  await once(chatScreen, 'close');
-  chatScreen.destroy();
-}
 
 interface SendMessageArgs {
   room: string,
@@ -34,8 +16,8 @@ process.on('unhandledRejection', error => {
 });
 
 yargs
-  .command('$0', 'default', main)
-  .command('chat', 'chat', main)
+  .command('$0', 'default', startTui)
+  .command('chat', 'chat', startTui)
   .command('auth', 'auth', async () => {
     console.log(JSON.stringify(await Auth.authenticate()));
   })
