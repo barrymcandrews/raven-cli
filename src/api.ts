@@ -1,4 +1,4 @@
-import {getSession} from './auth';
+import {Auth} from './auth';
 import axios from 'axios';
 
 const api = axios.create({
@@ -6,7 +6,7 @@ const api = axios.create({
 });
 
 api.interceptors.request.use(async (config) => {
-  config.headers.Authorization = (await getSession()).getIdToken().getJwtToken();
+  config.headers.Authorization = (await Auth.getSession()).getIdToken().getJwtToken();
   return config;
 });
 
@@ -38,4 +38,11 @@ export async function getMessages(roomName: string): Promise<Message[]> {
 export async function getMessagesBetween(roomName: string, before: number, after: number): Promise<Message[]> {
   const encodedRoom = encodeURIComponent(roomName);
   return (await api.get(`/rooms/${encodedRoom}/messages?before=${before}&after=${after}`)).data.items;
+}
+
+export async function sendMessage(roomName: string, message: string) {
+  const encodedRoom = encodeURIComponent(roomName);
+  return (await api.post(`/rooms/${encodedRoom}/messages`, {
+    message: message
+  }));
 }
