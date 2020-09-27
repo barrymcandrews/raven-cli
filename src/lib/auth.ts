@@ -41,8 +41,8 @@ export class Authenticator {
   }
 
 
-  async authenticate(): Promise<CognitoUserSession> {
-    if (this.session) {
+  async authenticate(useToken = true): Promise<CognitoUserSession> {
+    if (useToken && this.session) {
       try {
         this.session = await this.refresh();
         return this.session;
@@ -52,7 +52,7 @@ export class Authenticator {
     }
 
     const config = await Config.getConfig();
-    if ('refreshToken' in config && 'username' in config) {
+    if (useToken && 'refreshToken' in config && 'username' in config) {
       try {
       this.cognitoUser = new CognitoUser({
         Username: config.username!,

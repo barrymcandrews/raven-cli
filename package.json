@@ -1,6 +1,6 @@
 {
   "name": "@bmcandrews/raven-cli",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "main": "./build/lib/index.js",
   "license": "MIT",
   "scripts": {

@@ -25,10 +25,7 @@ const defaultConfiguration: Configuration = {
 
 let configuration: Configuration;
 
-export async function ensureConfig() {
-  if (fs.existsSync(configPath)) return;
-
-  console.log("No configuration file found (~/.raven)");
+export async function createConfig() {
   let answers = await inquirer.prompt([
     {
       name: 'customConfig',
@@ -53,6 +50,12 @@ export async function ensureConfig() {
   configuration = (answers.customConfig) ? await getConnectionSettings() : defaultConfiguration;
 
   await fs.promises.writeFile(configPath, jsyaml.dump(configuration));
+}
+
+export async function ensureConfig() {
+  if (fs.existsSync(configPath)) return;
+  console.log("No configuration file found (~/.raven)");
+  await createConfig();
 }
 
 export async function getConfig(): Promise<Configuration> {
