@@ -1,5 +1,6 @@
 {
   "name": "@bmcandrews/raven-cli",
+  "description": "A Command Line Interface for a serverless Chat Application",
   "version": "0.1.4",
   "main": "./build/lib/index.js",
   "license": "MIT",
