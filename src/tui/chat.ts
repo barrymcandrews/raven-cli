@@ -14,6 +14,12 @@ import WebSocket from 'ws';
 import {about} from './pages';
 import BoxElement = Widgets.BoxElement;
 
+const colors = {
+  cyan: "#00ffff",
+  grey: "#525252",
+  purple: "#5900ff",
+}
+
 interface Page {
   name: string
   body: string
@@ -64,7 +70,7 @@ export async function ChatScreen(): Promise<Widgets.Screen> {
     parent: sidebar,
     top: 0,
     left: 0,
-    content: '{#5900ff-fg}     R A V E N',
+    content: `{${colors.purple}-fg}     R A V E N`,
     tags: true,
     width: '100%',
     height: '100%-1'
@@ -113,7 +119,6 @@ export async function ChatScreen(): Promise<Widgets.Screen> {
 
   const messagesList = List({
     parent: mainBox,
-    // border: 'line',
     height: '100%-1',
     width: '100%',
     top: 0,
@@ -139,7 +144,7 @@ export async function ChatScreen(): Promise<Widgets.Screen> {
     left: 0,
     height: 1,
     tags: true,
-    content: `{#00ffff-fg}[${username}]{/}`,
+    content: `{${colors.grey}-fg}[${username}]{/}`,
     width: username.length + 3,
     hidden: true,
   })
@@ -172,6 +177,8 @@ export async function ChatScreen(): Promise<Widgets.Screen> {
 
   // Event Handlers
 
+  messageBox.key('enter', () => messageBox.focus());
+
   async function itemSelected(item: BoxElement, number: number) {
     if (number === sidebarSelectionIndex) return;
     let sidebarItem = sidebarItems[number];
@@ -189,6 +196,7 @@ export async function ChatScreen(): Promise<Widgets.Screen> {
     } else {
       usernameText.show();
       messageBox.show();
+      usernameText.setContent(`{${colors.grey}-fg}[${username}]{/}`);
       let room = sidebarItem as Room;
       messageBox.focus();
       screen.render();
@@ -257,7 +265,6 @@ export async function ChatScreen(): Promise<Widgets.Screen> {
     }
     ws.send(JSON.stringify(msg));
     messageBox.clearValue();
-    messageBox.focus();
     screen.render();
   }
 
@@ -284,8 +291,10 @@ export async function ChatScreen(): Promise<Widgets.Screen> {
         const sendHandler = () => sendMessage(ws);
         ws.on('open', async () => {
           statusText.setContent('[    Connected    ]');
+          usernameText.setContent(`{${colors.cyan}-fg}[${username}]{/}`);
           screen.render();
           messageBox.key('enter', sendHandler);
+          messageBox.focus();
           await getMissedMessages();
         });
         ws.on('close', () => messageBox.unkey('enter', sendHandler));
