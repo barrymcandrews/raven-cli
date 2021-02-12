@@ -29,6 +29,11 @@ const aboutPage: Page = {
   name: "   -- ABOUT --   ",
   body: about
 };
+
+const loadingPage: Page = {
+  name: `{${colors.grey}-fg}    Loading...   {/}`,
+  body: ""
+}
 const pages = [aboutPage];
 
 type SidebarItem = Room | Page;
@@ -45,7 +50,7 @@ export async function ChatScreen(): Promise<Widgets.Screen> {
 
   let sidebarSelectionIndex = 0;
   let messages: Message[] = [];
-  let sidebarItems: Array<Room | Page> = [...pages];
+  let sidebarItems: Array<Room | Page> = [...pages, loadingPage];
 
   const username = (await Auth.getUser()!).getUsername();
 
@@ -269,6 +274,7 @@ export async function ChatScreen(): Promise<Widgets.Screen> {
   }
 
   async function getMissedMessages() {
+    if (messages.length == 0) return;
     let missed = await Api.getMessagesBetween(sidebarItems[sidebarSelectionIndex].name, Date.now(), messages[0].timeSent + 1);
     messages.unshift(...missed);
     await renderMessages();

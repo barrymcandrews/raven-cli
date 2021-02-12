@@ -46,9 +46,7 @@ export class Authenticator {
       try {
         this.session = await this.refresh();
         return this.session;
-      } catch (e) {
-        console.log("Login object not found.")
-      }
+      } catch (e) {}
     }
 
     const config = await Config.getConfig();
@@ -62,9 +60,7 @@ export class Authenticator {
         })
       });
       return await this.refresh(config.refreshToken);
-      } catch (e) {
-        console.log("Refresh Token not found.")
-      }
+      } catch (e) {}
     }
 
     let answers = await inquirer.prompt([
